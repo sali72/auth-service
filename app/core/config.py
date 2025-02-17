@@ -59,4 +59,10 @@ class Settings(BaseSettings):
     def emails_enabled(self) -> bool:
         return bool(self.SMTP_HOST and self.EMAILS_FROM_EMAIL)
     
+    # Events
+    EVENTS_ENABLED: bool = False
+    EVENT_TARGETS: dict[str, list[str]] = {}
+    EVENT_MAX_ATTEMPTS: int = 5
+    EVENT_RETRY_DELAY: int = 1
+    
 settings = Settings()  # type: ignore
