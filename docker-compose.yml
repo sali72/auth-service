@@ -53,11 +53,17 @@ services:
       - auth-service-network
     ports:
       - 8000:8000
-    # For development only:
+      
+    # For development only {
     volumes:
       - ./app:/app/app
+      - .env:/app/.env
     command: fastapi dev --host 0.0.0.0 --reload app/main.py
-    
+    # Mapping host.docker.internal to the host gateway enables the container to send requests to your host machine.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    # } For development only
+
     depends_on:
       db:
         condition: service_healthy
@@ -69,11 +75,11 @@ services:
     environment:
       - POSTGRES_SERVER=db
       - POSTGRES_PORT=${POSTGRES_PORT}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 5
     build:
       context: .
     logging:
