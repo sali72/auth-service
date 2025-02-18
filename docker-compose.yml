@@ -9,8 +9,8 @@ services:
       retries: 5
       timeout: 10s
       start_period: 30s
-    # volumes:
-    #   - app-db-data:/var/lib/postgresql/data/pgdata
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data/pgdata
     env_file:
       - .env
     environment:
@@ -83,5 +83,7 @@ services:
         max-file: "3"
 
 networks:
-    auth-service-network:
-      
+  auth-service-network:
+
+volumes: 
+  auth-db-data:
