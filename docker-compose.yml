@@ -53,6 +53,11 @@ services:
       - auth-service-network
     ports:
       - 8000:8000
+    # For development only:
+    volumes:
+      - ./app:/app/app
+    command: fastapi dev --host 0.0.0.0 --reload app/main.py
+    
     depends_on:
       db:
         condition: service_healthy
