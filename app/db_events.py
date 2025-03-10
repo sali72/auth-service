@@ -23,7 +23,7 @@ class UserEventHandler:
             target: The User instance that has been inserted.
         """
         logger.info("DB event triggered | User created: %s", target.id)
-        self.publisher.publish_user_created_event(user_id=str(target.id), user_email=target.email)
+        self.publisher.publish_user_created_event(id=str(target.id))
 
     def handle_after_delete(self, mapper, connection, target):
         """
@@ -35,7 +35,7 @@ class UserEventHandler:
             target: The User instance that was deleted.
         """
         logger.info("DB event triggered | User deleted: %s", target.id)
-        self.publisher.publish_user_deleted_event(user_id=str(target.id))
+        self.publisher.publish_user_deleted_event(id=str(target.id))
 
 def register_event_listeners():
     """

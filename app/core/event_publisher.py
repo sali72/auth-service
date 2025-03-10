@@ -13,12 +13,12 @@ class BaseEventPublisher:
     Subclasses should implement specific event publishing methods.
     """
 
-    def publish_user_deleted_event(self, user_id: str) -> None:
+    def publish_user_deleted_event(self, id: str) -> None:
         raise NotImplementedError(
             "Subclasses must implement publish_user_deleted_event"
         )
 
-    def publish_user_created_event(self, user_id: str, user_email: str) -> None:
+    def publish_user_created_event(self, id: str) -> None:
         raise NotImplementedError(
             "Subclasses must implement publish_user_created_event"
         )
@@ -49,13 +49,25 @@ class HTTPEventPublisher(BaseEventPublisher):
         retry=retry_if_result(lambda r: r is None or r.status_code != 200),
         reraise=True,
     )
-    def _send_request(self, url: str, payload: Dict[str, Any]) -> requests.Response:
+    def _send_request(
+        self, url: str, payload: Dict[str, Any], method: str = "POST"
+    ) -> requests.Response:
         """
-        Sends an HTTP POST request with the given payload to the specified URL.
+        Sends an HTTP request with the given payload to the specified URL.
         Automatically retries the request if the response status code is not 200.
+
+        Args:
+            url: The target URL
+            payload: The JSON payload to send
+            method: HTTP method to use (default: "POST")
         """
-        self.logger.debug(f"Sending request to {url} with payload: {payload}")
-        response = requests.post(url, json=payload, timeout=5)
+        self.logger.debug(f"Sending {method} request to {url} with payload: {payload}")
+        if method.upper() == "DELETE":
+            user_id = str(payload.get("id", ""))
+            params = {"id": user_id}
+            response = requests.delete(url, params=params, timeout=5)
+        else:
+            response = requests.post(url, json=payload, timeout=5)
         if response.status_code != 200:
             self.logger.error(f"Received status code {response.status_code} from {url}")
         return response
@@ -70,7 +82,8 @@ class HTTPEventPublisher(BaseEventPublisher):
             self.logger.warning(f"No target services configured for event '{event}'.")
         for url in targets:
             try:
-                response = self._send_request(url, payload)
+                method = "DELETE" if event == "user_deleted" else "POST"
+                response = self._send_request(url, payload, method)
                 self.logger.info(
                     f"Event '{event}' delivered to {url} with status {response.status_code}"
                 )
@@ -79,18 +92,18 @@ class HTTPEventPublisher(BaseEventPublisher):
                     f"Failed to deliver event '{event}' to {url} after {self.max_attempts} attempts: {e}"
                 )
 
-    def publish_user_deleted_event(self, user_id: str) -> None:
+    def publish_user_deleted_event(self, id: str) -> None:
         """
         Publishes a user deletion event by assembling the payload and sending it to the target endpoints.
         """
-        payload = {"event": "user_deleted", "user_id": user_id}
+        payload = {"event": "user_deleted", "id": id}
         self._publish_event("user_deleted", payload)
 
-    def publish_user_created_event(self, user_id: str, user_email: str) -> None:
+    def publish_user_created_event(self, id: str) -> None:
         """
         Publishes a user creation event by assembling the payload and sending it to the target endpoints.
         """
-        payload = {"event": "user_created", "user_id": user_id, "email": user_email}
+        payload = {"event": "user_created", "id": id}
         self._publish_event("user_created", payload)
 
 
@@ -100,14 +113,14 @@ class NullEventPublisher(BaseEventPublisher):
     Useful for local or small projects where event publishing is not enabled.
     """
 
-    def publish_user_deleted_event(self, user_id: str) -> None:
+    def publish_user_deleted_event(self, id: str) -> None:
         logging.info(
-            f"[NullEventPublisher] Would publish user_deleted event for user_id: {user_id}"
+            f"[NullEventPublisher] Would publish user_deleted event for user_id: {id}"
         )
 
-    def publish_user_created_event(self, user_id: str, user_email: str) -> None:
+    def publish_user_created_event(self, id: str) -> None:
         logging.info(
-            f"[NullEventPublisher] Would publish user_created event for user_id: {user_id}, email: {user_email}"
+            f"[NullEventPublisher] Would publish user_created event for user_id: {id}"
         )
 
 
