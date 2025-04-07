@@ -9,8 +9,6 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # Add the project root to PYTHONPATH
 export PYTHONPATH="${PROJECT_ROOT}:${PYTHONPATH:-}"
 
-
-
 # Let the DB start
 python "${PROJECT_ROOT}/app/backend_pre_start.py"
 
