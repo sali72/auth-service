@@ -18,13 +18,13 @@ class Settings(BaseSettings):
     FRONTEND_HOST: str = "http://localhost:5173"
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
-    PROJECT_NAME: str
+    PROJECT_NAME: str = "Auth-Service"
     SENTRY_DSN: HttpUrl | None = None
-    POSTGRES_SERVER: str
+    POSTGRES_SERVER: str = "localhost"
     POSTGRES_PORT: int = 5432
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str = ""
-    POSTGRES_DB: str = ""
+    POSTGRES_USER: str = "postgres"
+    POSTGRES_PASSWORD: str = "123"
+    POSTGRES_DB: str = "auth_service"
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -48,8 +48,8 @@ class Settings(BaseSettings):
     EMAILS_FROM_NAME: str | None = None
 
     EMAIL_TEST_USER: str = "test@example.com"
-    FIRST_SUPERUSER: str
-    FIRST_SUPERUSER_PASSWORD: str
+    FIRST_SUPERUSER: str = "admin@example.com"
+    FIRST_SUPERUSER_PASSWORD: str = "stringst"
 
     EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
 
@@ -57,11 +57,17 @@ class Settings(BaseSettings):
     @property
     def emails_enabled(self) -> bool:
         return bool(self.SMTP_HOST and self.EMAILS_FROM_EMAIL)
-    
+
     # Events
-    EVENTS_ENABLED: bool = False
-    EVENT_TARGETS: dict[str, list[str]] = {}
+    EVENTS_ENABLED: bool = True
+    EVENT_TARGETS: dict[str, list[str]] = {
+        "user_created": ["http://localhost:8000/users/"],
+        "user_deleted": ["http://localhost:8000/users/"],
+    }
     EVENT_MAX_ATTEMPTS: int = 5
     EVENT_RETRY_DELAY: int = 1
     
+    DOCKER_IMAGE_BACKEND: str = "auth-service"
+
+
 settings = Settings()  # type: ignore
