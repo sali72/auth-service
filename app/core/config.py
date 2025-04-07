@@ -13,8 +13,8 @@ class Settings(BaseSettings):
     )
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = "CHANGE THIS IN PRODUCTION"
-    # 60 minutes * 24 hours * 8 days = 8 days
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+    # 60 minutes * 24 hours * 8 days = 800 days
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 800
     FRONTEND_HOST: str = "http://localhost:5173"
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
